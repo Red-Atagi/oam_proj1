@@ -1,0 +1,36 @@
+<script src="https://cdn.jsdelivr.net/gh/netizenorg/netnet-standard-library/build/nn.min.js"></script>
+<script src="https://tonejs.github.io/build/Tone.js"></script>
+
+<label>mouse frequency:</label>
+<label id="mouse">start</label>
+<lable>clipboard frequency:</lable>
+<label id="clipboard">start</label>
+
+
+
+<script>
+/* global nn, Tone */
+  let mouseX //int between 0 and 20,000
+  let clipboard //int between 0 and 20,000
+  let pasted = [] //list of ints between 0 and 20,000
+  const osc = new Tone.Oscillator(440, 'sine').toDestination()
+  // osc.start()
+  
+  function update (event) {
+  	mouseX = nn.map(event.x, 0, nn.width, 27.5, 4186)
+    osc.frequency.value = nn.map(event.x, 0, nn.width, 220, 440)
+    nn.get('#mouse').content(mouseX)
+	}
+  
+  function press(event) {
+    console.log(event)
+    if (event.key === 'c' && event.key) {
+     	clipboard = mouseX 
+      nn.get('#clipboard').content(clipboard)
+    }
+  }
+
+  
+  nn.on('keydown', press)
+	nn.on('mousemove', update)
+</script>
