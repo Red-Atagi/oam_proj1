@@ -1,36 +1,38 @@
 <script src="https://cdn.jsdelivr.net/gh/netizenorg/netnet-standard-library/build/nn.min.js"></script>
 <script src="https://tonejs.github.io/build/Tone.js"></script>
 
-<label>mouse frequency:</label>
-<label id="mouse">start</label>
-<lable>clipboard frequency:</lable>
-<label id="clipboard">start</label>
+<h3>mouse frequency:</h3>
+<h3 id="mouse">start</h3>
+<h3>clipboard frequency:</h3>
+<h3 id="clipboard">start</h3>
 
 
 
 <script>
 /* global nn, Tone */
   let mouseX //int between 0 and 20,000
+  let mouseY //int between 1 and 128
   let clipboard //int between 0 and 20,000
   let pasted = [] //list of ints between 0 and 20,000
-  const osc = new Tone.Oscillator(440, 'sine').toDestination()
-  // osc.start()
+  const synth = new Tone.PolySynth().toDestination()
   
   function update (event) {
-  	mouseX = nn.map(event.x, 0, nn.width, 27.5, 4186)
-    osc.frequency.value = nn.map(event.x, 0, nn.width, 220, 440)
-    nn.get('#mouse').content(mouseX)
+  	mouseX = Math.round(nn.map(event.x, 0, nn.width, 27.5, 4186))
+    nn.get('#mouse').content(mouseX.toString())
 	}
   
   function press(event) {
-    console.log(event)
-    if (event.key === 'c' && event.key) {
+    if (event.key === 'c' && event.ctrlKey) {
      	clipboard = mouseX 
-      nn.get('#clipboard').content(clipboard)
+      nn.get('#clipboard').content(clipboard.toString())
     }
   }
+  function play (time) {
+     synth.triggerAttackRelease(mouseX, "4n", time) 
+}
 
   
   nn.on('keydown', press)
 	nn.on('mousemove', update)
+  Tone.Transport.scheduleRepeat(time => play(time), '16n')
 </script>
