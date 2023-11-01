@@ -6,14 +6,32 @@
 <h3>clipboard frequency:</h3>
 <h3 id="clipboard">start</h3>
 
-
-
 <script>
 /* global nn, Tone */
   let mouseX //int between 0 and 20,000
-  let mouseY //int between 1 and 128
-  let clipboard //int between 0 and 20,000
-  let pasted = [] //list of ints between 0 and 20,000
+  let mouseY = 4//int between 1 and 16 that divide 16
+  let clipboard = null//obj with freq and n
+  let state = {
+    step: 0,
+    sequence: [
+      [], 
+      [],
+    	[],
+    	[],
+    	[],
+    	[],
+    	[],
+    	[],
+    	[],
+    	[],
+    	[],
+    	[],
+    	[],
+    	[],
+    	[],
+    	[]
+  	]
+  } //list of obj with freq and n
   const synth = new Tone.PolySynth().toDestination()
   
   function update (event) {
@@ -21,12 +39,29 @@
     nn.get('#mouse').content(mouseX.toString())
 	}
   
+  function paste() {
+    let seqStep = 16 / clipboard.n
+    let seqNum = 0
+    while (seqNum < 16) {
+      state.sequence[seqNum].push(clipboard)
+      seqNum += seqStep
+    }
+    clipboard = null
+    nn.get('#clipboard').content("empty")
+  }
+  
   function press(event) {
     if (event.key === 'c' && event.ctrlKey) {
-     	clipboard = mouseX 
-      nn.get('#clipboard').content(clipboard.toString())
+     	clipboard = {freq: mouseX, n:mouseY} 
+      nn.get('#clipboard').content(mouseX.toString())
+    }
+    if (event.key === 'v' && event.ctrlKey) {
+      if (clipboard !== null) {
+        paste()
+      }
     }
   }
+  
   function play (time) {
      synth.triggerAttackRelease(mouseX, "4n", time) 
 }
