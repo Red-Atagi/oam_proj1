@@ -1,6 +1,55 @@
 <script src="https://cdn.jsdelivr.net/gh/netizenorg/netnet-standard-library/build/nn.min.js"></script>
 <script src="https://tonejs.github.io/build/Tone.js"></script>
 
+<style>
+  * {
+    box-sizing: border-box;
+  }
+  
+  body {
+    margin: 0;
+    height: 100vh;
+  }
+  
+  /* CSS for the "enter screen" */
+  #curtain {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100vw;
+    height: 100vh;
+    background-color: #000;
+    position: fixed;
+    z-index: 1000; /* make sure this has a higher z-index than other elements */
+  }
+  
+  #enter {
+    font-family: monospace;
+    color: white;
+    background-color: black;
+    border: 1px solid white;
+    padding: 20px 30px;
+    cursor: pointer;
+  }
+  
+  #direction {
+    font-family: monospace;
+    color: white;
+    padding: 20px 30px;
+
+  }
+  
+  #enter:hover {
+    color: black;
+    background-color: white;
+  }
+</style>
+
+<section id="curtain">
+  <button id="enter">ENTER</button>
+  <p id="direction">Ctrl + c to copy note<br>Ctrl + v to paste note<br>Backspace to remove last note</p>
+</section>
+
 <h3 id="mouse">mouse frequency: start</h3>
 <h3 id="mouseN">mouse note length: start</h3>
 <h3 id="clipboard">clipboard frequency: empty</h3>
@@ -90,4 +139,8 @@
   nn.on('keydown', press)
 	nn.on('mousemove', update)
   Tone.Transport.scheduleRepeat(time => play(time), '16n')
+  nn.get('#enter').on('click', async () => {
+  	await Tone.start() // to restart AudioContext in Tone.js
+  	nn.get('#curtain').css({ display: 'none' }) // hide curtain
+	})
 </script>
