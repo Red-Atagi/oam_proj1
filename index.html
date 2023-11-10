@@ -1,12 +1,10 @@
 <script src="https://cdn.jsdelivr.net/gh/netizenorg/netnet-standard-library/build/nn.min.js"></script>
 <script src="https://tonejs.github.io/build/Tone.js"></script>
 
-<h3>mouse frequency:</h3>
-<h3 id="mouse">start</h3>
-<h3>clipboard frequency:</h3>
-<h3 id="clipboard">empty</h3>
-<h3>pasted</h3>
-<h3 id="pasted"> empty </h3>
+<h3 id="mouse">mouse frequency: start</h3>
+<h3 id="mouseN">mouse note length: start</h3>
+<h3 id="clipboard">clipboard frequency: empty</h3>
+<h3 id="pasted">pasted: empty </h3>
 
 <script>
 /* global nn, Tone */
@@ -16,36 +14,21 @@
   let pasted = [] //array of freq
   let state = {
     step: 0,
-    sequence: [
-      [], 
-      [],
-    	[],
-    	[],
-    	[],
-    	[],
-    	[],
-    	[],
-    	[],
-    	[],
-    	[],
-    	[],
-    	[],
-    	[],
-    	[],
-    	[]
-  	]
+    sequence: [[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []]
   } //list of obj with freq and n
   const synth = new Tone.PolySynth().toDestination()
   Tone.Transport.start()
   
   function update (event) {
   	mouseX = Math.round(nn.map(event.x, 0, nn.width, 27.5, 4186))
-    nn.get('#mouse').content(mouseX.toString())
+    mouseY = 2**Math.round(nn.map(event.y, 0, nn.height, 0, 4))
+    nn.get('#mouse').content(`mouse frequency: ${mouseX}`)
+    nn.get('#mouseN').content(`mouse note length: ${mouseY}n`)
 	}
   
   function paste() {
     pasted.push(clipboard.freq)
-    nn.get('#pasted').content(pasted.toString())
+    nn.get('#pasted').content(`pasted: ${pasted}`)
     let seqStep = 16 / clipboard.n
     let seqNum = 0
     while (seqNum < 16) {
@@ -59,7 +42,7 @@
   function press(event) {
     if (event.key === 'c' && event.ctrlKey) {
      	clipboard = {freq: mouseX, n:mouseY} 
-      nn.get('#clipboard').content(mouseX.toString())
+      nn.get('#clipboard').content(`clipboard frequency: ${mouseX}`)
     }
     if (event.key === 'v' && event.ctrlKey) {
       if (clipboard !== null) {
