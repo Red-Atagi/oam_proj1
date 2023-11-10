@@ -16,6 +16,7 @@
     step: 0,
     sequence: [[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []]
   } //list of obj with freq and n
+  let memoryN = []
   const synth = new Tone.PolySynth().toDestination()
   Tone.Transport.start()
   
@@ -28,6 +29,7 @@
   
   function paste() {
     pasted.push(clipboard.freq)
+    memoryN.push(clipboard.n)
     nn.get('#pasted').content(`pasted: ${pasted}`)
     let seqStep = 16 / clipboard.n
     let seqNum = 0
@@ -39,7 +41,21 @@
     nn.get('#clipboard').content("empty")
   }
   
+  function backspace() {
+		pasted.pop()
+    let tempMem = memoryN.pop()
+    nn.get('#pasted').content(`pasted: ${pasted}`)
+    let seqStep = 16 / tempMem
+    let seqNum = 0
+    while (seqNum < 16) {
+      state.sequence[seqNum].pop()
+      seqNum += seqStep
+    }
+  }
+
+
   function press(event) {
+    console.log(event)
     if (event.key === 'c' && event.ctrlKey) {
      	clipboard = {freq: mouseX, n:mouseY} 
       nn.get('#clipboard').content(`clipboard frequency: ${mouseX}`)
@@ -47,6 +63,11 @@
     if (event.key === 'v' && event.ctrlKey) {
       if (clipboard !== null) {
         paste()
+      }
+    }
+    if (event.key === 'Backspace') {
+      if (pasted.length > 0){
+        backspace()
       }
     }
   }
