@@ -70,31 +70,42 @@
   Tone.Transport.start()
   
   function update (event) {
-  	mouseX = Math.round(nn.map(event.x, 0, nn.width, 27.5, 4186))
+    //maps mouse x position to range of frequency
+  	mouseX = Math.round(nn.map(event.x, 0, nn.width, 27, 4186))
+    //2,4,8,16 are multiples of 2 so use 2^x to map position to note
     mouseY = 2**Math.round(nn.map(event.y, 0, nn.height, 0, 4))
+    //update text
     nn.get('#mouse').content(`mouse frequency: ${mouseX}`)
     nn.get('#mouseN').content(`mouse note length: ${mouseY}n`)
 	}
   
   function paste() {
+    //collects info for pasted and memory
     pasted.push(clipboard.freq)
     memoryN.push(clipboard.n)
     nn.get('#pasted').content(`pasted: ${pasted}`)
+    //determines how often a note is played
     let seqStep = 16 / clipboard.n
     let seqNum = 0
+    //adds clipboard to the sequence index that matches how often it is played
+    //ex: 4n is played at time 0,4,8,12
     while (seqNum < 16) {
       state.sequence[seqNum].push(clipboard)
       seqNum += seqStep
     }
+    //empty clipboard
     clipboard = null
     nn.get('#clipboard').content("empty")
   }
   
   function backspace() {
+    //remove previous pasted
 		pasted.pop()
-    let tempMem = memoryN.pop()
     nn.get('#pasted').content(`pasted: ${pasted}`)
-    let seqStep = 16 / tempMem
+		//removes note from sequence
+    //does this by finding which times the note would be played and removing the
+    //times last note
+    let seqStep = 16 / memoryN.pop()
     let seqNum = 0
     while (seqNum < 16) {
       state.sequence[seqNum].pop()
@@ -104,16 +115,18 @@
 
 
   function press(event) {
-    console.log(event)
+    //copy
     if (event.key === 'c' && event.ctrlKey) {
      	clipboard = {freq: mouseX, n:mouseY} 
       nn.get('#clipboard').content(`clipboard frequency: ${mouseX}`)
     }
+    //paste
     if (event.key === 'v' && event.ctrlKey) {
       if (clipboard !== null) {
         paste()
       }
     }
+    //backspace
     if (event.key === 'Backspace') {
       if (pasted.length > 0){
         backspace()
@@ -122,16 +135,17 @@
   }
   
   function play (time) {
-    //synth.triggerAttackRelease(mouseX, '4n', time)
-    if ((state.step % (16 / mouseY)) === 0) {
+    //checks if the mouse should be played
+    //ex: 2n is played every 8 time = (16/2) so should play 0 time, and 8 time
+    if ((state.step % (state.sequence.length / mouseY)) === 0) {
     	   synth.triggerAttackRelease(mouseX, '4n', time)
     }
+    //gets array of note to be played.
     const index = state.step % state.sequence.length
     const obj = state.sequence[index]
     for (let i =0; i < obj.length; i++)
       {
-        console.log()
-    		synth.triggerAttackRelease(obj[i].freq, '4n', time)
+    		synth.triggerAttackRelease(obj[i].freq, `${obj[i].n}n`, time)
       }
     state.step++}
 
